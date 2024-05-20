@@ -45,6 +45,41 @@ class ChessBoard {
         }
     }
 
+    func getFEN() -> String {
+        var fen = ""
+        for rank in (0..<8).reversed() {
+            var emptySpaces = 0
+            for file in 0..<8 {
+                let square = squareIndex(file: file, rank: rank)
+                var foundPiece: Character? = nil
+                for (piece, bitboard) in bitboards {
+                    if bitboard.isBitSet(at: square) {
+                        foundPiece = piece.character
+                        break
+                    }
+                }
+                if foundPiece != nil {
+                    if emptySpaces > 0 {
+                        fen += String(emptySpaces)
+                        emptySpaces = 0
+                    }
+                    fen += String(foundPiece!)
+                } else {
+                    emptySpaces += 1
+                }
+            }
+            if emptySpaces > 0 {
+                fen += String(emptySpaces)
+            }
+            if rank > 0 {
+                fen += "/"
+            }
+        }
+        fen += " "
+        fen += (turn == .white) ? "w" : "b"
+        return fen
+    }
+
     func printBoard() {
         for rank in (0..<8).reversed() {
             for file in 0..<8 {
