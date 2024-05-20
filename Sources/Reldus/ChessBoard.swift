@@ -81,7 +81,7 @@ class ChessBoard {
             let capturedPawnSquare = move.to + (turn == .white ? -8 : 8)
             let capturedPawn = (turn == .white) ? ChessPiece.blackPawn : ChessPiece.whitePawn
             bitboards[capturedPawn]?.clearBit(at: capturedPawnSquare)
-        }   
+        }
         
         if move.isCastling {
             let rookFrom, rookTo: Int
@@ -119,31 +119,75 @@ class ChessBoard {
             let capturedPawn = (turn == .white) ? ChessPiece.blackPawn : ChessPiece.whitePawn
             bitboards[capturedPawn]?.setBit(at: capturedPawnSquare)
         }
-        
+
         if move.isCastling {
             let rookFrom, rookTo: Int
             if move.to == squareIndex(file: 6, rank: turn == .white ? 0 : 7) { // Kingside
-                rookFrom = squareIndex(file: 7, rank: turn == .white ? 0 : 7)
-                rookTo = squareIndex(file: 5, rank: turn == .white ? 0 : 7)
+                rookFrom = squareIndex(file: 5, rank: turn == .white ? 0 : 7)
+                rookTo = squareIndex(file: 7, rank: turn == .white ? 0 : 7)
             } else { // Queenside
-                rookFrom = squareIndex(file: 0, rank: turn == .white ? 0 : 7)
-                rookTo = squareIndex(file: 3, rank: turn == .white ? 0 : 7)
+                rookFrom = squareIndex(file: 3, rank: turn == .white ? 0 : 7)
+                rookTo = squareIndex(file: 0, rank: turn == .white ? 0 : 7)
             }
-            bitboards[turn == .white ? .whiteRook : .blackRook]?.clearBit(at: rookTo)
-            bitboards[turn == .white ? .whiteRook : .blackRook]?.setBit(at: rookFrom)
+            bitboards[turn == .white ? .whiteRook : .blackRook]?.clearBit(at: rookFrom)
+            bitboards[turn == .white ? .whiteRook : .blackRook]?.setBit(at: rookTo)
         }
 
         turn = turn.opposite
     }
 
-    func isCheckmate() -> Bool {
-        // TODO: Implement checkmate logic
-        return false
+    func copy() -> ChessBoard {
+        let board = ChessBoard()
+        board.bitboards = bitboards
+        board.occupancy = occupancy
+        board.turn = turn
+        return board
     }
 
-    func isStalemate() -> Bool {
-        // TODO: Implement stalemate logic
-        return false
+    func getKingSquare(for color: Color) -> Int {
+        let king = (color == .white) ? ChessPiece.whiteKing : ChessPiece.blackKing
+        return bitboards[king]?.board.trailingZeroBitCount ?? -1
+    }
+
+    func isCheckmate() -> Bool {
+        let king = (turn == .white) ? ChessPiece.whiteKing : ChessPiece.blackKing
+        guard let kingBitboard = bitboards[king], kingBitboard.board != 0 else {
+            return false
+        }
+
+        let kingSquare = kingBitboard.board.trailingZeroBitCount
+        if !isSquareUnderAttack(square: kingSquare, by: turn.opposite) {
+            return false
+        }
+
+        let moves = MoveGenerator.generateMoves(for: self, color: turn)
+
+        for move in moves {
+            makeMove(move)
+            if !isSquareUnderAttack(square: kingSquare, by: turn.opposite) {
+                undoMove(move)
+                return false
+            }
+            undoMove(move)
+        }
+
+        return true
+    }
+
+    func isSquareUnderAttack(square: Int, by color: Color) -> Bool {
+        let attackBitboard = generateAttackBitboard(color: color)
+        return attackBitboard.isBitSet(at: square)
+    }
+
+    func generateAttackBitboard(color: Color) -> Bitboard {
+        var attackBitboard = Bitboard()
+        let moves = MoveGenerator.generateMoves(for: self, color: color)
+        
+        for move in moves {
+            attackBitboard.setBit(at: move.to)
+        }
+        
+        return attackBitboard
     }
 
     func getBitboard(for piece: ChessPiece) -> Bitboard? {
@@ -161,13 +205,5 @@ class ChessBoard {
             }
         }
         return nil
-    }
-
-    func copy() -> ChessBoard {
-        let newBoard = ChessBoard()
-        newBoard.bitboards = self.bitboards
-        newBoard.occupancy = self.occupancy
-        newBoard.turn = self.turn
-        return newBoard
     }
 }
