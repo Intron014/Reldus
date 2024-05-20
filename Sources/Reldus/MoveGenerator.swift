@@ -154,4 +154,21 @@ class MoveGenerator {
     private static func slidingPieces(for color: Color) -> [ChessPiece] {
         return color == .white ? [.whiteBishop, .whiteRook, .whiteQueen] : [.blackBishop, .blackRook, .blackQueen]
     }
+
+    static func perft(board: ChessBoard, depth: Int) -> Int {
+        if depth == 0 {
+            return 1
+        }
+
+        let moves = generateMoves(for: board, color: board.turn)
+        var nodes = 0
+
+        for move in moves {
+            let newBoard = board.copy()
+            newBoard.makeMove(move)
+            nodes += perft(board: newBoard, depth: depth - 1)
+        }
+
+        return nodes
+    }
 }
