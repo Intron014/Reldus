@@ -77,6 +77,25 @@ class ChessBoard {
             bitboards[promotionPiece]?.setBit(at: move.to)
         }
         
+        if move.isEnPassant {
+            let capturedPawnSquare = move.to + (turn == .white ? -8 : 8)
+            let capturedPawn = (turn == .white) ? ChessPiece.blackPawn : ChessPiece.whitePawn
+            bitboards[capturedPawn]?.clearBit(at: capturedPawnSquare)
+        }   
+        
+        if move.isCastling {
+            let rookFrom, rookTo: Int
+            if move.to == squareIndex(file: 6, rank: turn == .white ? 0 : 7) { // Kingside
+                rookFrom = squareIndex(file: 7, rank: turn == .white ? 0 : 7)
+                rookTo = squareIndex(file: 5, rank: turn == .white ? 0 : 7)
+            } else { // Queenside
+                rookFrom = squareIndex(file: 0, rank: turn == .white ? 0 : 7)
+                rookTo = squareIndex(file: 3, rank: turn == .white ? 0 : 7)
+            }
+            bitboards[turn == .white ? .whiteRook : .blackRook]?.clearBit(at: rookFrom)
+            bitboards[turn == .white ? .whiteRook : .blackRook]?.setBit(at: rookTo)
+        }
+
         turn = turn.opposite
     }
 
@@ -95,6 +114,25 @@ class ChessBoard {
             bitboards[move.piece]?.setBit(at: move.from)
         }
         
+        if move.isEnPassant {
+            let capturedPawnSquare = move.to + (turn == .white ? -8 : 8)
+            let capturedPawn = (turn == .white) ? ChessPiece.blackPawn : ChessPiece.whitePawn
+            bitboards[capturedPawn]?.setBit(at: capturedPawnSquare)
+        }
+        
+        if move.isCastling {
+            let rookFrom, rookTo: Int
+            if move.to == squareIndex(file: 6, rank: turn == .white ? 0 : 7) { // Kingside
+                rookFrom = squareIndex(file: 7, rank: turn == .white ? 0 : 7)
+                rookTo = squareIndex(file: 5, rank: turn == .white ? 0 : 7)
+            } else { // Queenside
+                rookFrom = squareIndex(file: 0, rank: turn == .white ? 0 : 7)
+                rookTo = squareIndex(file: 3, rank: turn == .white ? 0 : 7)
+            }
+            bitboards[turn == .white ? .whiteRook : .blackRook]?.clearBit(at: rookTo)
+            bitboards[turn == .white ? .whiteRook : .blackRook]?.setBit(at: rookFrom)
+        }
+
         turn = turn.opposite
     }
 
