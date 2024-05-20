@@ -200,6 +200,7 @@ class MoveGenerator {
 
             board.undoMove(move)
         }
-    return result
+
+        return result
     }
 }
