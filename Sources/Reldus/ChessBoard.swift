@@ -3,6 +3,7 @@ import Foundation
 class ChessBoard {
     private var bitboards: [ChessPiece: Bitboard] = [:]
     private var occupancy: Bitboard = Bitboard()
+    var turn: Color = .white
 
     init() {
         for piece in ChessPiece.allCases {
@@ -24,7 +25,10 @@ class ChessBoard {
         guard parts.count > 0 else { return }
         
         let boardFEN = parts[0]
+        let turnFEN = parts[1]
         let rows = boardFEN.split(separator: "/")
+        
+        turn = (turnFEN == "w") ? .white : .black
         
         for (rankIndex, row) in rows.reversed().enumerated() {
             var fileIndex = 0
@@ -72,6 +76,8 @@ class ChessBoard {
             bitboards[move.piece]?.clearBit(at: move.to)
             bitboards[promotionPiece]?.setBit(at: move.to)
         }
+        
+        turn = turn.opposite
     }
 
     func undoMove(_ move: Move) {
@@ -88,6 +94,18 @@ class ChessBoard {
             bitboards[promotionPiece]?.clearBit(at: move.to)
             bitboards[move.piece]?.setBit(at: move.from)
         }
+        
+        turn = turn.opposite
+    }
+
+    func isCheckmate() -> Bool {
+        // TODO: Implement checkmate logic
+        return false
+    }
+
+    func isStalemate() -> Bool {
+        // TODO: Implement stalemate logic
+        return false
     }
 
     func getBitboard(for piece: ChessPiece) -> Bitboard? {
@@ -105,5 +123,13 @@ class ChessBoard {
             }
         }
         return nil
+    }
+
+    func copy() -> ChessBoard {
+        let newBoard = ChessBoard()
+        newBoard.bitboards = self.bitboards
+        newBoard.occupancy = self.occupancy
+        newBoard.turn = self.turn
+        return newBoard
     }
 }
