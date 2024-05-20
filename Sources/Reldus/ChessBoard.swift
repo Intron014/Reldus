@@ -97,4 +97,13 @@ class ChessBoard {
     func getOccupancy() -> Bitboard {
         return occupancy
     }
+
+    func pieceAt(square: Int) -> ChessPiece? {
+        for (piece, bitboard) in bitboards {
+            if bitboard.isBitSet(at: square) {
+                return piece
+            }
+        }
+        return nil
+    }
 }
