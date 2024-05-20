@@ -155,20 +155,51 @@ class MoveGenerator {
         return color == .white ? [.whiteBishop, .whiteRook, .whiteQueen] : [.blackBishop, .blackRook, .blackQueen]
     }
 
-    static func perft(board: ChessBoard, depth: Int) -> Int {
+    struct PerftResult {
+        var nodes: Int = 0
+        var captures: Int = 0
+        var enPassants: Int = 0
+        var castles: Int = 0
+        var promotions: Int = 0
+        var checks: Int = 0
+    }
+
+    static func perft(board: ChessBoard, depth: Int) -> PerftResult {
         if depth == 0 {
-            return 1
+            return PerftResult(nodes: 1)
         }
 
+        var result = PerftResult()
         let moves = generateMoves(for: board, color: board.turn)
-        var nodes = 0
-
+        
         for move in moves {
-            let newBoard = board.copy()
-            newBoard.makeMove(move)
-            nodes += perft(board: newBoard, depth: depth - 1)
-        }
+            board.makeMove(move)
+            let perftResult = perft(board: board, depth: depth - 1)
+            result.nodes += perftResult.nodes
+            result.captures += perftResult.captures
+            result.enPassants += perftResult.enPassants
+            result.castles += perftResult.castles
+            result.promotions += perftResult.promotions
+            result.checks += perftResult.checks
 
-        return nodes
+            if move.capturedPiece != nil {
+                result.captures += 1
+            }
+            if move.isEnPassant {
+                result.enPassants += 1
+            }
+            if move.isCastling {
+                result.castles += 1
+            }
+            if move.promotion != nil {
+                result.promotions += 1
+            }
+            if move.isCheck {
+                result.checks += 1
+            }
+
+            board.undoMove(move)
+        }
+    return result
     }
 }

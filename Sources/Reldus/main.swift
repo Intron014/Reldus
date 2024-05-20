@@ -8,7 +8,14 @@ func testPerft() {
     let depth = 4
     let nodes = MoveGenerator.perft(board: board, depth: depth)
     
-    print("Perft test for depth \(depth): \(nodes) nodes")
+    print("Perft \(depth) nodes: \(nodes.nodes)")
+    print("Captures: \(nodes.captures)")
+    print("En passants: \(nodes.enPassants)")
+    print("Castles: \(nodes.castles)")
+    print("Promotions: \(nodes.promotions)")
+    print("Checks: \(nodes.checks)")
+
+    
 }
 
 testPerft()
