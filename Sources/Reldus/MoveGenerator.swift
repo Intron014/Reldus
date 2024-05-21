@@ -26,19 +26,19 @@ class MoveGenerator {
                 
                 if !board.getOccupancy().isBitSet(at: toSquare) {
                     let mmove = Move(from: square, to: toSquare, piece: color == .white ? .whitePawn : .blackPawn)
-                    if MoveValidator().isMoveLegal(move: mmove, board: board) {
-                        moves.append(mmove)
-                    }
-                    // moves.append(Move(from: square, to: toSquare, piece: color == .white ? .whitePawn : .blackPawn))
+                    // if MoveValidator().isMoveLegal(move: mmove, board: board) {
+                    //     moves.append(mmove)
+                    // }
+                    moves.append(mmove)
                     
                     if (color == .white && rank == 1) || (color == .black && rank == 6) {
                         let doubleSquare = (rank + 2 * direction) * 8 + file
                         if !board.getOccupancy().isBitSet(at: doubleSquare) {
                             let mmove = Move(from: square, to: doubleSquare, piece: color == .white ? .whitePawn : .blackPawn)
-                            if MoveValidator().isMoveLegal(move: mmove, board: board) {
-                                moves.append(mmove)
-                            }
-                            // moves.append(Move(from: square, to: doubleSquare, piece: color == .white ? .whitePawn : .blackPawn))
+                            // if MoveValidator().isMoveLegal(move: mmove, board: board) {
+                            //     moves.append(mmove)
+                            // }
+                            moves.append(mmove)
                         }
                     }
                 }
@@ -48,10 +48,10 @@ class MoveGenerator {
                     let captureSquare = (rank + direction) * 8 + (file - 1)
                     if board.getOccupancy().isBitSet(at: captureSquare), let capturedPiece = board.pieceAt(square: captureSquare), capturedPiece.character.isUppercase != (color == .white) {
                         let mmove = Move(from: square, to: captureSquare, piece: color == .white ? .whitePawn : .blackPawn, capturedPiece: capturedPiece)
-                        if MoveValidator().isMoveLegal(move: mmove, board: board) {
-                            moves.append(mmove)
-                        }
-                        // moves.append(Move(from: square, to: captureSquare, piece: color == .white ? .whitePawn : .blackPawn, capturedPiece: capturedPiece))
+                        // if MoveValidator().isMoveLegal(move: mmove, board: board) {
+                        //     moves.append(mmove)
+                        // }
+                        moves.append(mmove)
                     }
                 }
                 
@@ -59,10 +59,10 @@ class MoveGenerator {
                     let captureSquare = (rank + direction) * 8 + (file + 1)
                     if board.getOccupancy().isBitSet(at: captureSquare), let capturedPiece = board.pieceAt(square: captureSquare), capturedPiece.character.isUppercase != (color == .white) {
                         let mmove = Move(from: square, to: captureSquare, piece: color == .white ? .whitePawn : .blackPawn, capturedPiece: capturedPiece)
-                        if MoveValidator().isMoveLegal(move: mmove, board: board) {
-                            moves.append(mmove)
-                        }
-                        // moves.append(Move(from: square, to: captureSquare, piece: color == .white ? .whitePawn : .blackPawn, capturedPiece: capturedPiece))
+                        // if MoveValidator().isMoveLegal(move: mmove, board: board) {
+                        //     moves.append(mmove)
+                        // }
+                        moves.append(mmove)
                     }
                 }
             }
@@ -88,14 +88,16 @@ class MoveGenerator {
                         let toSquare = newRank * 8 + newFile
                         if !board.getOccupancy().isBitSet(at: toSquare) {
                             let mmove = Move(from: square, to: toSquare, piece: color == .white ? .whiteKnight : .blackKnight)
-                            if MoveValidator().isMoveLegal(move: mmove, board: board) {
-                                moves.append(mmove)
-                            }
+                            // if MoveValidator().isMoveLegal(move: mmove, board: board) {
+                            //     moves.append(mmove)
+                            // }
+                            moves.append(mmove)
                         } else if let capturedPiece = board.pieceAt(square: toSquare), capturedPiece.character.isUppercase != (color == .white) {
                             let mmove = Move(from: square, to: toSquare, piece: color == .white ? .whiteKnight : .blackKnight, capturedPiece: capturedPiece)
-                            if MoveValidator().isMoveLegal(move: mmove, board: board) {
-                                moves.append(mmove)
-                            }
+                            // if MoveValidator().isMoveLegal(move: mmove, board: board) {
+                            //     moves.append(mmove)
+                            // }
+                            moves.append(mmove)
                         }
                     }
                 }
@@ -129,14 +131,16 @@ class MoveGenerator {
                                 let toSquare = newRank * 8 + newFile
                                 if !board.getOccupancy().isBitSet(at: toSquare) {
                                     let mmove = Move(from: square, to: toSquare, piece: pieceType)
-                                    if MoveValidator().isMoveLegal(move: mmove, board: board) {
-                                        moves.append(mmove)
-                                    }
+                                    // if MoveValidator().isMoveLegal(move: mmove, board: board) {
+                                    //     moves.append(mmove)
+                                    // }
+                                    moves.append(mmove)
                                 } else if let capturedPiece = board.pieceAt(square: toSquare), capturedPiece.character.isUppercase != (color == .white) {
                                     let mmove = Move(from: square, to: toSquare, piece: pieceType, capturedPiece: capturedPiece)
-                                    if MoveValidator().isMoveLegal(move: mmove, board: board) {
-                                        moves.append(mmove)
-                                    }
+                                    // if MoveValidator().isMoveLegal(move: mmove, board: board) {
+                                    //     moves.append(mmove)
+                                    // }
+                                    moves.append(mmove)
                                     break
                                 } else {
                                     break
@@ -168,14 +172,16 @@ class MoveGenerator {
                         let toSquare = newRank * 8 + newFile
                         if !board.getOccupancy().isBitSet(at: toSquare) {
                             let mmove: Move = Move(from: square, to: toSquare, piece: color == .white ? .whiteKing : .blackKing)
-                            if MoveValidator().isMoveLegal(move: mmove, board: board) {
-                                moves.append(mmove)
-                            }
+                            // if MoveValidator().isMoveLegal(move: mmove, board: board) {
+                            //     moves.append(mmove)
+                            // }
+                            moves.append(mmove)
                         } else if let capturedPiece = board.pieceAt(square: toSquare), capturedPiece.character.isUppercase != (color == .white) {
                             let mmove: Move = Move(from: square, to: toSquare, piece: color == .white ? .whiteKing : .blackKing, capturedPiece: capturedPiece)
-                            if MoveValidator().isMoveLegal(move: mmove, board: board) {
-                                moves.append(mmove)
-                            }
+                            // if MoveValidator().isMoveLegal(move: mmove, board: board) {
+                            //     moves.append(mmove)
+                            // }
+                            moves.append(mmove)
                         }
                     }
                 }

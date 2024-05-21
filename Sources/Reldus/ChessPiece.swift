@@ -48,4 +48,21 @@ enum ChessPiece: Int, CaseIterable {
         default: return nil
         }
     }
+
+    var color: Color {
+        switch self {
+        case .whitePawn, .whiteKnight, .whiteBishop, .whiteRook, .whiteQueen, .whiteKing:
+            return .white
+        case .blackPawn, .blackKnight, .blackBishop, .blackRook, .blackQueen, .blackKing:
+            return .black
+        }
+    }
+
+    var oppositePawn: ChessPiece {
+        switch self {
+        case .whitePawn: return .blackPawn
+        case .blackPawn: return .whitePawn
+        default: fatalError("Invalid pawn color")
+        }
+    }
 }

@@ -18,9 +18,9 @@ class MoveValidator {
             return false
         }
         
-        // guard doesMoveLeaveKingSafe(move: move, board: board) else {
-        //     return false
-        // }
+        guard doesMoveLeaveKingSafe(move: move, board: board) else {
+            return false
+        }
         
         return true
     }
