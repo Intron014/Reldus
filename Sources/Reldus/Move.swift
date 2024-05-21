@@ -21,3 +21,10 @@ struct Move {
         self.isCheck = isCheck
     }
 }
+extension Move: CustomStringConvertible {
+    var description: String {
+        let fromSquare = squareToString(square: from)
+        let toSquare = squareToString(square: to)
+        return "\(piece.character): \(fromSquare)\(toSquare)"
+    }
+}
