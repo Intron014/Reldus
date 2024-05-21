@@ -5,12 +5,13 @@ import Foundation
 let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 let chessBoard = ChessBoard(fen: fen)
 chessBoard.printBoard()
+print(chessBoard.getFEN())
 
 func testPerft() {
     let fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     let board = ChessBoard(fen: fen)
     
-    let depth = 4
+    let depth = 3
     let nodes = MoveGenerator.perft(board: board, depth: depth)
     
     print("Perft \(depth) nodes: \(nodes.nodes)")
