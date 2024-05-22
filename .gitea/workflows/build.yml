@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - ReImp
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang \
+          libicu-dev \
+          wget \
+          tar \
+          binutils \
+          git \
+          gnupg2 \
+          libc6-dev \
+          libcurl4-openssl-dev \
+          libedit2 \
+          libgcc-9-dev \
+          libpython3.8 \
+          libsqlite3-0 \
+          libstdc++-9-dev \
+          libxml2-dev \
+          libz3-dev \
+          pkg-config \
+          tzdata \
+          unzip \
+          zlib1g-dev
+
+      - name: Install Swift
+        run: |
+          wget https://download.swift.org/swift-5.10-release/ubuntu2204/swift-5.10-RELEASE/swift-5.10-RELEASE-ubuntu22.04.tar.gz
+          tar xzf swift-5.10-RELEASE-ubuntu22.04.tar.gz
+          echo "SWI=swift-5.10-RELEASE-ubuntu22.04/usr/bin/swift" >> $GITHUB_ENV
+
+      - name: Build Swift project
+        run: ${{ env.SWI }} build
+
