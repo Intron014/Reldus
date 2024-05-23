@@ -29,3 +29,13 @@ extension Move: CustomStringConvertible {
         return "\(piece.character): \(fromSquare)\(toSquare)"
     }
 }
+
+extension Move {
+    func toUCI() -> String {
+        let fromFile = Character(UnicodeScalar((from % 8) + 97)!) // 'a' -> 97
+        let fromRank = Character(UnicodeScalar((from / 8) + 49)!) // '1' -> 49
+        let toFile = Character(UnicodeScalar((to % 8) + 97)!)
+        let toRank = Character(UnicodeScalar((to / 8) + 49)!)
+        return "\(fromFile)\(fromRank)\(toFile)\(toRank)"
+    }
+}
