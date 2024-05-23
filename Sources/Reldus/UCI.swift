@@ -80,58 +80,66 @@ class UCI {
     }
 
     private func parseMove(moveString: String) -> Move? {
-        guard moveString.count >= 4 else { return nil }
+    guard moveString.count >= 4 else { return nil }
 
-        let fromFile = Int(moveString[moveString.startIndex].asciiValue! - Character("a").asciiValue!)
-        let fromRank = Int(moveString[moveString.index(moveString.startIndex, offsetBy: 1)].asciiValue! - Character("1").asciiValue!)
-        let toFile = Int(moveString[moveString.index(moveString.startIndex, offsetBy: 2)].asciiValue! - Character("a").asciiValue!)
-        let toRank = Int(moveString[moveString.index(moveString.startIndex, offsetBy: 3)].asciiValue! - Character("1").asciiValue!)
+    let fromFile = Int(moveString[moveString.startIndex].asciiValue! - Character("a").asciiValue!)
+    let fromRank = Int(moveString[moveString.index(moveString.startIndex, offsetBy: 1)].asciiValue! - Character("1").asciiValue!)
+    let toFile = Int(moveString[moveString.index(moveString.startIndex, offsetBy: 2)].asciiValue! - Character("a").asciiValue!)
+    let toRank = Int(moveString[moveString.index(moveString.startIndex, offsetBy: 3)].asciiValue! - Character("1").asciiValue!)
 
-        let from = fromRank * 8 + fromFile
-        let to = toRank * 8 + toFile
+    let from = fromRank * 8 + fromFile
+    let to = toRank * 8 + toFile
 
-        guard let piece = board.pieceAt(square: from) else { return nil }
+    guard let piece = board.pieceAt(square: from) else { return nil }
 
-        var capturedPiece: ChessPiece? = nil
-        var promotion: ChessPiece? = nil
-        var isEnPassant = false
-        var isCastling = false
-        var isCheck = false // TODO: Determine if the move results in check
+    var capturedPiece: ChessPiece? = nil
+    var promotion: ChessPiece? = nil
+    var isEnPassant = false
+    var isCastling = false
 
-        if let targetPiece = board.pieceAt(square: to) {
-            capturedPiece = targetPiece
-        } else if piece == .whitePawn || piece == .blackPawn, fromFile != toFile {
-            // En passant capture
-            let enPassantSquare = to + (piece.color == .white ? -8 : 8)
-            if let captured = board.pieceAt(square: enPassantSquare), captured == piece.oppositePawn {
-                capturedPiece = captured
-                isEnPassant = true
-            }
+    if let targetPiece = board.pieceAt(square: to) {
+        capturedPiece = targetPiece
+    } else if piece == .whitePawn || piece == .blackPawn, fromFile != toFile {
+        // En passant capture
+        let enPassantSquare = to + (piece.color == .white ? -8 : 8)
+        if let captured = board.pieceAt(square: enPassantSquare), captured == piece.oppositePawn {
+            capturedPiece = captured
+            isEnPassant = true
         }
-
-        if moveString.count == 5 {
-            switch moveString[moveString.index(moveString.startIndex, offsetBy: 4)] {
-            case "q":
-                promotion = (piece.color == .white) ? .whiteQueen : .blackQueen
-            case "r":
-                promotion = (piece.color == .white) ? .whiteRook : .blackRook
-            case "b":
-                promotion = (piece.color == .white) ? .whiteBishop : .blackBishop
-            case "n":
-                promotion = (piece.color == .white) ? .whiteKnight : .blackKnight
-            default:
-                break
-            }
-        }
-
-        if piece == .whiteKing || piece == .blackKing {
-            if abs(fromFile - toFile) == 2 {
-                isCastling = true
-            }
-        }
-
-        return Move(from: from, to: to, piece: piece, capturedPiece: capturedPiece, promotion: promotion, isEnPassant: isEnPassant, isCastling: isCastling, isCheck: isCheck)
     }
+
+    if moveString.count == 5 {
+        switch moveString[moveString.index(moveString.startIndex, offsetBy: 4)] {
+        case "q":
+            promotion = (piece.color == .white) ? .whiteQueen : .blackQueen
+        case "r":
+            promotion = (piece.color == .white) ? .whiteRook : .blackRook
+        case "b":
+            promotion = (piece.color == .white) ? .whiteBishop : .blackBishop
+        case "n":
+            promotion = (piece.color == .white) ? .whiteKnight : .blackKnight
+        default:
+            break
+        }
+    }
+
+    if piece == .whiteKing || piece == .blackKing {
+        if abs(fromFile - toFile) == 2 {
+            isCastling = true
+        }
+    }
+
+    let move = Move(from: from, to: to, piece: piece, capturedPiece: capturedPiece, promotion: promotion, isEnPassant: isEnPassant, isCastling: isCastling, isCheck: false)
+
+    let boardCopy = board.copy()
+    boardCopy.makeMove(move)
+
+    let opponentKingSquare = boardCopy.getKingSquare(for: piece.color.opposite)
+    let isCheck = boardCopy.isSquareUnderAttack(square: opponentKingSquare, by: piece.color)
+    move.isCheck = isCheck
+
+    return move
+}
 
     private func handleGo(command: [Substring]) {
         let bestMove = searchBestMove()
