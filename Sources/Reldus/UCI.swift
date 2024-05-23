@@ -30,7 +30,7 @@ class UCI {
         case "position":
             handlePosition(command: command)
         case "go":
-            handleGo(command: command)
+            handleGo(command: command.joined(separator: " "), board: board)
         case "quit":
             handleQuit()
         case "board":
@@ -141,17 +141,36 @@ class UCI {
     return move
 }
 
-    private func handleGo(command: [Substring]) {
-        let bestMove = searchBestMove()
-        print("bestmove \(formatMove(move: bestMove))")
-    }
-
-    private func searchBestMove() -> Move {
+    func handleGo(command: String, board: ChessBoard) {
+        let parts = command.split(separator: " ")
+        var depth = 3 // Default search depth
+        
+        if let depthIndex = parts.firstIndex(of: "depth"), depthIndex + 1 < parts.count {
+            depth = Int(parts[depthIndex + 1]) ?? 3
+        }
+        
+        var bestMove: Move?
+        var bestValue = Int.min
+        
         let moves = MoveGenerator.generateMoves(for: board, color: board.turn)
-        // for move in moves {
-        //     print(move.description)
-        // }
-        return moves.randomElement()! // Placeholder (Hopefully)
+        
+        for move in moves {
+            board.makeMove(move)
+            let boardCopy = board.copy()
+            let moveValue = Search.minimax(board: boardCopy, depth: depth - 1, maximizingPlayer: false)
+            board.undoMove(move)
+            
+            if moveValue > bestValue {
+                bestValue = moveValue
+                bestMove = move
+            }
+        }
+        
+        if let bestMove = bestMove {
+            print("bestmove \(bestMove.toUCI())")
+        } else {
+            print("bestmove (none)")
+        }
     }
 
     private func formatMove(move: Move) -> String {
