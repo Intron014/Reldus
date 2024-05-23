@@ -143,10 +143,9 @@ class UCI {
 
     func handleGo(command: String, board: ChessBoard) {
         let parts = command.split(separator: " ")
-        var depth = 3 // Default search depth
         
         if let depthIndex = parts.firstIndex(of: "depth"), depthIndex + 1 < parts.count {
-            depth = Int(parts[depthIndex + 1]) ?? 3
+            searchDepth = Int(parts[depthIndex + 1]) ?? 3
         }
         
         var bestMove: Move?
@@ -157,7 +156,13 @@ class UCI {
         for move in moves {
             board.makeMove(move)
             let boardCopy = board.copy()
-            let moveValue = Search.minimax(board: boardCopy, depth: depth - 1, maximizingPlayer: false)
+            var moveValue: Int
+            if(board.turn == .white){
+                moveValue = Search.minimax(board: boardCopy, depth: searchDepth - 1, maximizingPlayer: true)
+            } else {
+                moveValue = Search.minimax(board: boardCopy, depth: searchDepth - 1, maximizingPlayer: false)
+
+            }
             board.undoMove(move)
             
             if moveValue > bestValue {
