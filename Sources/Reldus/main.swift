@@ -28,4 +28,5 @@ func testPerft() {
 
     
 }
-uciLoop()
+let uci = UCI()
+uci.start()
