@@ -132,6 +132,11 @@ class ChessBoard {
         }
 
         turn = turn.opposite
+
+        // Determine if the move results in a check
+        let opponentColor = turn.opposite
+        let opponentKingSquare = getKingSquare(for: opponentColor)
+        move.isCheck = isSquareUnderAttack(square: opponentKingSquare, by: turn)
     }
 
     func undoMove(_ move: Move) {
@@ -178,35 +183,9 @@ class ChessBoard {
         board.turn = turn
         return board
     }
-
     func getKingSquare(for color: Color) -> Int {
         let king = (color == .white) ? ChessPiece.whiteKing : ChessPiece.blackKing
         return bitboards[king]?.board.trailingZeroBitCount ?? -1
-    }
-
-    func isCheckmate() -> Bool {
-        let king = (turn == .white) ? ChessPiece.whiteKing : ChessPiece.blackKing
-        guard let kingBitboard = bitboards[king], kingBitboard.board != 0 else {
-            return false
-        }
-
-        let kingSquare = kingBitboard.board.trailingZeroBitCount
-        if !isSquareUnderAttack(square: kingSquare, by: turn.opposite) {
-            return false
-        }
-
-        let moves = MoveGenerator.generateMoves(for: self, color: turn)
-
-        for move in moves {
-            makeMove(move)
-            if !isSquareUnderAttack(square: kingSquare, by: turn.opposite) {
-                undoMove(move)
-                return false
-            }
-            undoMove(move)
-        }
-
-        return true
     }
 
     func isSquareUnderAttack(square: Int, by color: Color) -> Bool {
@@ -217,16 +196,16 @@ class ChessBoard {
     func generateAttackBitboard(color: Color) -> Bitboard {
         var attackBitboard = Bitboard()
         let moves = MoveGenerator.generateMoves(for: self, color: color)
-        
+
         for move in moves {
             attackBitboard.setBit(at: move.to)
         }
-        
+
         return attackBitboard
     }
 
-    func getBitboard(for piece: ChessPiece) -> Bitboard? {
-        return bitboards[piece]
+    func getBitboard(for piece: ChessPiece) -> Bitboard {
+        return bitboards[piece] ?? Bitboard()
     }
 
     func getOccupancy() -> Bitboard {

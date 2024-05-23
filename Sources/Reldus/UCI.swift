@@ -32,6 +32,8 @@ class UCI {
             handleGo(command: command)
         case "quit":
             handleQuit()
+        case "print":
+            board.printBoard()
         default:
             print("Unknown command: \(commandName)")
         }
@@ -48,7 +50,7 @@ class UCI {
     }
 
     private func handleUCINewGame() {
-        board = ChessBoard()
+        board = ChessBoard(fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
     }
 
     private func handlePosition(command: [Substring]) {
@@ -137,6 +139,9 @@ class UCI {
 
     private func searchBestMove() -> Move {
         let moves = MoveGenerator.generateMoves(for: board, color: board.turn)
+        for move in moves {
+            print(move.description)
+        }
         return moves.randomElement()! // Placeholder (Hopefully)
     }
 

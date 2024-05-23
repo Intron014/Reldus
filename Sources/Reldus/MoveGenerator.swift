@@ -15,7 +15,7 @@ class MoveGenerator {
     
     private static func generatePawnMoves(for board: ChessBoard, color: Color) -> [Move] {
         var moves: [Move] = []
-        let pawnBitboard = board.getBitboard(for: color == .white ? .whitePawn : .blackPawn)!
+        let pawnBitboard = board.getBitboard(for: color == .white ? .whitePawn : .blackPawn)
         let direction = color == .white ? 1 : -1
         
         for square in 0..<64 {
@@ -73,7 +73,7 @@ class MoveGenerator {
     
     private static func generateKnightMoves(for board: ChessBoard, color: Color) -> [Move] {
         var moves: [Move] = []
-        let knightBitboard = board.getBitboard(for: color == .white ? .whiteKnight : .blackKnight)!
+        let knightBitboard = board.getBitboard(for: color == .white ? .whiteKnight : .blackKnight)
         let knightMoves: [(Int, Int)] = [(-2, -1), (-1, -2), (1, -2), (2, -1), (2, 1), (1, 2), (-1, 2), (-2, 1)]
         
         for square in 0..<64 {
@@ -117,7 +117,7 @@ class MoveGenerator {
             .whiteQueen: [(-1, -1), (1, -1), (1, 1), (-1, 1), (-1, 0), (1, 0), (0, -1), (0, 1)],
             .blackQueen: [(-1, -1), (1, -1), (1, 1), (-1, 1), (-1, 0), (1, 0), (0, -1), (0, 1)]]
         for pieceType in pieceTypes {
-            let pieceBitboard = board.getBitboard(for: pieceType)!
+            let pieceBitboard = board.getBitboard(for: pieceType)
             for square in 0..<64 {
                 if pieceBitboard.isBitSet(at: square) {
                     let file = square % 8
@@ -158,7 +158,7 @@ class MoveGenerator {
 
     private static func generateKingMoves(for board: ChessBoard, color: Color) -> [Move] {
         var moves: [Move] = []
-        let kingBitboard = board.getBitboard(for: color == .white ? .whiteKing : .blackKing)!
+        let kingBitboard = board.getBitboard(for: color == .white ? .whiteKing : .blackKing)
         let kingMoves: [(Int, Int)] = [(-1, -1), (0, -1), (1, -1), (-1, 0), (1, 0), (-1, 1), (0, 1), (1, 1)]
         for square in 0..<64 {
             if kingBitboard.isBitSet(at: square) {
