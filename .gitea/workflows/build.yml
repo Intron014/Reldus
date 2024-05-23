@@ -15,6 +15,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          echo "Installing dependencies..."
           sudo apt-get update
           sudo apt-get install -y clang \
           libicu-dev \
@@ -39,9 +40,12 @@ jobs:
 
       - name: Install Swift
         run: |
-          wget https://download.swift.org/swift-5.10-release/ubuntu2204/swift-5.10-RELEASE/swift-5.10-RELEASE-ubuntu22.04.tar.gz
+          echo "Downloading Swift 5.10..."
+          wget --quiet https://download.swift.org/swift-5.10-release/ubuntu2204/swift-5.10-RELEASE/swift-5.10-RELEASE-ubuntu22.04.tar.gz
+          echo "Extracting Swift 5.10..."
           tar xzf swift-5.10-RELEASE-ubuntu22.04.tar.gz
           echo "SWI=swift-5.10-RELEASE-ubuntu22.04/usr/bin/swift" >> $GITHUB_ENV
+          echo "Swift 5.10 installed"
 
       - name: Build Swift project
         run: ${{ env.SWI }} build
