@@ -1,6 +1,11 @@
 import Foundation
 
-func uciLoop() {
-    let chessBoard = ChessBoard(fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
-    chessBoard.printBoard()
+class UCI {
+    private var board: ChessBoard
+    private var searchDepth: Int
+    
+    init() {
+        self.board = ChessBoard()
+        self.searchDepth = 3
+    }
 }
