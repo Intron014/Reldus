@@ -52,4 +52,18 @@ struct Bitboard {
     func or(with bitboard: Bitboard) -> Bitboard {
         return Bitboard(board: board | bitboard.board)
     }
+
+    func popCount() -> Int {
+        return board.nonzeroBitCount
+    }
+
+    func getOccupiedSquares() -> [Int] {
+        var occupiedSquares = [Int]()
+        for index in 0..<64 {
+            if isBitSet(at: index) {
+                occupiedSquares.append(index)
+            }
+        }
+        return occupiedSquares
+    }
 }
