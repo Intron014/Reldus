@@ -3,6 +3,7 @@ import Foundation
 class UCI {
     private var board: ChessBoard
     private var searchDepth: Int
+    private let startPosFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
     
     init() {
         self.board = ChessBoard()
@@ -32,7 +33,7 @@ class UCI {
             handleGo(command: command)
         case "quit":
             handleQuit()
-        case "print":
+        case "board":
             board.printBoard()
         default:
             print("Unknown command: \(commandName)")
@@ -50,14 +51,14 @@ class UCI {
     }
 
     private func handleUCINewGame() {
-        board = ChessBoard(fen: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1")
+        board = ChessBoard(fen: startPosFen)
     }
 
     private func handlePosition(command: [Substring]) {
         guard command.count > 1 else { return }
         
         if command[1] == "startpos" {
-            board = ChessBoard()
+            board = ChessBoard(fen: startPosFen)
             if command.count > 2 {
                 applyMoves(moves: Array(command[3...]))
             }
@@ -139,9 +140,9 @@ class UCI {
 
     private func searchBestMove() -> Move {
         let moves = MoveGenerator.generateMoves(for: board, color: board.turn)
-        for move in moves {
-            print(move.description)
-        }
+        // for move in moves {
+        //     print(move.description)
+        // }
         return moves.randomElement()! // Placeholder (Hopefully)
     }
 
