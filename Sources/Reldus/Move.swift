@@ -1,6 +1,6 @@
 import Foundation
 
-struct Move {
+class Move {
     let piece: ChessPiece
     let from: Int
     let to: Int
@@ -8,7 +8,7 @@ struct Move {
     let promotion: ChessPiece?
     let isEnPassant: Bool
     let isCastling: Bool
-    let isCheck: Bool
+    var isCheck: Bool
 
     init(from: Int, to: Int, piece: ChessPiece, capturedPiece: ChessPiece? = nil, promotion: ChessPiece? = nil, isEnPassant: Bool = false, isCastling: Bool = false, isCheck: Bool = false) {
         self.piece = piece
@@ -21,6 +21,7 @@ struct Move {
         self.isCheck = isCheck
     }
 }
+
 extension Move: CustomStringConvertible {
     var description: String {
         let fromSquare = squareToString(square: from)
