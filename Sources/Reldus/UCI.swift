@@ -202,7 +202,7 @@ class UCI {
         return move
     }
 
-    func handleGo(command: String, board: ChessBoard) {
+    private func handleGo(command: String, board: ChessBoard) {
         let parts = command.split(separator: " ")
         
         if let depthIndex = parts.firstIndex(of: "depth"), depthIndex + 1 < parts.count {
