@@ -29,6 +29,8 @@ class UCI {
             handleUCINewGame()
         case "position":
             handlePosition(command: command)
+        case "goperft":
+            handlePerft(command: command.joined(separator: " "))
         case "go":
             handleGo(command: command.joined(separator: " "), board: board)
         case "quit":
@@ -52,6 +54,59 @@ class UCI {
 
     private func handleUCINewGame() {
         board = ChessBoard(fen: startPosFen)
+    }
+    
+    func handlePerft(command: String) {
+        let board = ChessBoard(fen: startPosFen)
+        let parts = command.split(separator: " ")
+        guard parts.count > 1, let depth = Int(parts[1]) else {
+            print("Invalid perft command")
+            return
+        }
+        
+        let startTime = Date()
+        let totalNodes = perft(board: board, depth: depth)
+        let endTime = Date()
+        
+        let timeTaken = endTime.timeIntervalSince(startTime)
+        let nodesPerSecond = Double(totalNodes) / timeTaken
+        
+        print("Total: \(totalNodes)")
+        print(String(format: "Time: %.2f secs", timeTaken))
+        print(String(format: "NodesPerSec: %.2f NPS", nodesPerSecond))
+    }
+    
+    private func perft(board: ChessBoard, depth: Int) -> Int {
+        var totalNodes = 0
+        let moves = MoveGenerator.generateMoves(for: board, color: board.turn)
+        
+        for move in moves {
+            board.makeMove(move)
+            let nodes = perftRecursive(board: board, depth: depth - 1)
+            board.undoMove(move)
+            
+            print("\(move.toUCI()) - \(nodes)")
+            totalNodes += nodes
+        }
+        
+        return totalNodes
+    }
+    
+    private func perftRecursive(board: ChessBoard, depth: Int) -> Int {
+        if depth == 0 {
+            return 1
+        }
+        
+        var nodes = 0
+        let moves = MoveGenerator.generateMoves(for: board, color: board.turn)
+        
+        for move in moves {
+            board.makeMove(move)
+            nodes += perftRecursive(board: board, depth: depth - 1)
+            board.undoMove(move)
+        }
+        
+        return nodes
     }
 
     private func handlePosition(command: [Substring]) {
@@ -161,7 +216,6 @@ class UCI {
                 moveValue = Search.minimax(board: boardCopy, depth: searchDepth - 1, maximizingPlayer: true)
             } else {
                 moveValue = Search.minimax(board: boardCopy, depth: searchDepth - 1, maximizingPlayer: false)
-
             }
             board.undoMove(move)
             
