@@ -14,21 +14,38 @@ class MoveValidator {
         }
 
         switch piece {
-        case .whitePawn, .blackPawn:
-            return validatePawnMove(move: move, board: board, piece: piece!)
-        case .whiteKnight, .blackKnight:
-            return validateKnightMove(move: move)
-        case .whiteBishop, .blackBishop:
-            return validateBishopMove(move: move, board: board)
-        case .whiteRook, .blackRook:
-            return validateRookMove(move: move, board: board)
-        case .whiteQueen, .blackQueen:
-            return validateQueenMove(move: move, board: board)
-        case .whiteKing, .blackKing:
-            return validateKingMove(move: move, board: board)
-        default:
-            return false
+            case .whitePawn, .blackPawn:
+                return validatePawnMove(move: move, board: board, piece: piece!)
+            case .whiteKnight, .blackKnight:
+                return validateKnightMove(move: move)
+            case .whiteBishop, .blackBishop:
+                return validateBishopMove(move: move, board: board)
+            case .whiteRook, .blackRook:
+                return validateRookMove(move: move, board: board)
+            case .whiteQueen, .blackQueen:
+                return validateQueenMove(move: move, board: board)
+            case .whiteKing, .blackKing:
+                return validateKingMove(move: move, board: board)
+            default:
+                return false
         }
+    }
+
+    static func isMoveValid(board: ChessBoard, move: Move) -> Bool {
+        let simulatedBoard = board.copy()
+        simulatedBoard.makeMove(move)
+        return !isKingInCheck(board: simulatedBoard, color: simulatedBoard.turn)
+    }
+
+    static func isKingInCheck(board: ChessBoard, color: Color) -> Bool {
+        let kingSquare = board.getKingSquare(for: color)
+        return board.isSquareUnderAttack(square: kingSquare, by: color.opposite)
+    }
+
+    static func willMoveExposeKing(board: ChessBoard, move: Move) -> Bool {
+        let simulatedBoard = board.copy()
+        simulatedBoard.makeMove(move)
+        return isKingInCheck(board: simulatedBoard, color: simulatedBoard.turn)
     }
 
     private func validatePawnMove(move: Move, board: ChessBoard, piece: ChessPiece) -> Bool {
