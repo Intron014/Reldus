@@ -1,182 +1,154 @@
-import Foundation
-
 class MoveValidator {
     func isMoveLegal(move: Move, board: ChessBoard) -> Bool {
-        guard let piece = board.pieceAt(square: move.from) else {
-            return false
-        }
-        
-        guard piece == move.piece else {
-            return false
-        }
-        
         guard move.from >= 0 && move.from < 64 && move.to >= 0 && move.to < 64 else {
             return false
         }
-        
-        guard isValidPieceMove(move: move, board: board) else {
+
+        let piece = board.pieceAt(square: move.from)
+        guard piece != nil && piece!.color == board.turn else {
             return false
         }
-        
-        guard doesMoveLeaveKingSafe(move: move, board: board) else {
+
+        if let destinationPiece = board.pieceAt(square: move.to), destinationPiece.color == piece!.color {
             return false
         }
-        
+
+        switch piece {
+        case .whitePawn, .blackPawn:
+            return validatePawnMove(move: move, board: board, piece: piece!)
+        case .whiteKnight, .blackKnight:
+            return validateKnightMove(move: move)
+        case .whiteBishop, .blackBishop:
+            return validateBishopMove(move: move, board: board)
+        case .whiteRook, .blackRook:
+            return validateRookMove(move: move, board: board)
+        case .whiteQueen, .blackQueen:
+            return validateQueenMove(move: move, board: board)
+        case .whiteKing, .blackKing:
+            return validateKingMove(move: move, board: board)
+        default:
+            return false
+        }
+    }
+
+    private func validatePawnMove(move: Move, board: ChessBoard, piece: ChessPiece) -> Bool {
+        let direction = (piece == .whitePawn) ? 1 : -1
+        let startRank = (piece == .whitePawn) ? 1 : 6
+        let toFile = move.to % 8
+        let fromFile = move.from % 8
+
+        if move.to == move.from + direction * 8 && board.pieceAt(square: move.to) == nil {
+            return true
+        }
+
+        if move.to == move.from + direction * 16 && board.pieceAt(square: move.to) == nil && board.pieceAt(square: move.from + direction * 8) == nil && move.from / 8 == startRank {
+            return true
+        }
+        if abs(toFile - fromFile) == 1 && move.to == move.from + direction * 8 + direction && board.pieceAt(square: move.to) != nil {
+            return true
+        }
+
+        if abs(toFile - fromFile) == 1 && move.to == move.from + direction * 8 + direction && board.enPassantSquare == move.to {
+            return true
+        }
+
+        return false
+    }
+
+    private func validateKnightMove(move: Move) -> Bool {
+        let fromFile = move.from % 8
+        let fromRank = move.from / 8
+        let toFile = move.to % 8
+        let toRank = move.to / 8
+        let fileDiff = abs(fromFile - toFile)
+        let rankDiff = abs(fromRank - toRank)
+
+        return (fileDiff == 1 && rankDiff == 2) || (fileDiff == 2 && rankDiff == 1)
+    }
+
+    private func validateBishopMove(move: Move, board: ChessBoard) -> Bool {
+        let fromFile = move.from % 8
+        let fromRank = move.from / 8
+        let toFile = move.to % 8
+        let toRank = move.to / 8
+        let fileDiff = abs(fromFile - toFile)
+        let rankDiff = abs(fromRank - toRank)
+
+        if fileDiff != rankDiff {
+            return false
+        }
+
+        let fileStep = (toFile - fromFile) / fileDiff
+        let rankStep = (toRank - fromRank) / rankDiff
+
+        for step in 1..<fileDiff {
+            let intermediateFile = fromFile + step * fileStep
+            let intermediateRank = fromRank + step * rankStep
+            if board.pieceAt(square: intermediateRank * 8 + intermediateFile) != nil {
+                return false
+            }
+        }
+
         return true
     }
 
-    private func isValidPieceMove(move: Move, board: ChessBoard) -> Bool {
-        switch move.piece {
-        case .whitePawn, .blackPawn:
-            return isValidPawnMove(move: move, board: board)
-        case .whiteKnight, .blackKnight:
-            return isValidKnightMove(move: move)
-        case .whiteBishop, .blackBishop:
-            return isValidBishopMove(move: move, board: board)
-        case .whiteRook, .blackRook:
-            return isValidRookMove(move: move, board: board)
-        case .whiteQueen, .blackQueen:
-            return isValidQueenMove(move: move, board: board)
-        case .whiteKing, .blackKing:
-            return isValidKingMove(move: move, board: board)
+    private func validateRookMove(move: Move, board: ChessBoard) -> Bool {
+        let fromFile = move.from % 8
+        let fromRank = move.from / 8
+        let toFile = move.to % 8
+        let toRank = move.to / 8
+
+        if fromFile != toFile && fromRank != toRank {
+            return false
         }
+
+        let fileStep = fromFile == toFile ? 0 : (toFile > fromFile ? 1 : -1)
+        let rankStep = fromRank == toRank ? 0 : (toRank > fromRank ? 1 : -1)
+        let steps = max(abs(fromFile - toFile), abs(fromRank - toRank))
+
+        for step in 1..<steps {
+            let intermediateFile = fromFile + step * fileStep
+            let intermediateRank = fromRank + step * rankStep
+            if board.pieceAt(square: intermediateRank * 8 + intermediateFile) != nil {
+                return false
+            }
+        }
+
+        return true
     }
 
-    private func isValidPawnMove(move: Move, board: ChessBoard) -> Bool {
-        let direction = (move.piece == .whitePawn) ? 8 : -8
-        let startRank = (move.piece == .whitePawn) ? 1 : 6
-        let targetRank = (move.piece == .whitePawn) ? 7 : 0
-        
-        if move.to == move.from + direction && !board.getOccupancy().isBitSet(at: move.to) {
+    private func validateQueenMove(move: Move, board: ChessBoard) -> Bool {
+        return validateBishopMove(move: move, board: board) || validateRookMove(move: move, board: board)
+    }
+
+    private func validateKingMove(move: Move, board: ChessBoard) -> Bool {
+        let fromFile = move.from % 8
+        let fromRank = move.from / 8
+        let toFile = move.to % 8
+        let toRank = move.to / 8
+        let fileDiff = abs(fromFile - toFile)
+        let rankDiff = abs(fromRank - toRank)
+
+        if fileDiff <= 1 && rankDiff <= 1 {
             return true
         }
-        
-        if move.from / 8 == startRank && move.to == move.from + 2 * direction && !board.getOccupancy().isBitSet(at: move.to) && !board.getOccupancy().isBitSet(at: move.from + direction) {
-            return true
-        }
-        
-        if abs((move.to % 8) - (move.from % 8)) == 1 && move.to == move.from + direction && board.pieceAt(square: move.to) != nil {
-            return true
-        }
-        
-        if move.isEnPassant {
-            let capturedPawnSquare = move.to + ((move.piece == .whitePawn) ? -8 : 8)
-            if let capturedPawn = board.pieceAt(square: capturedPawnSquare), capturedPawn == (move.piece == .whitePawn ? .blackPawn : .whitePawn) {
+
+        if fileDiff == 2 && rankDiff == 0 {
+            let rank = move.from / 8
+            let rookFile = toFile == 2 ? 0 : 7
+            let rookSquare = rank * 8 + rookFile
+            if let rook = board.pieceAt(square: rookSquare), rook == (board.turn == .white ? .whiteRook : .blackRook) {
+                let kingSide = toFile == 6
+                let pathSquares = kingSide ? [5, 6] : [1, 2, 3]
+                for offset in pathSquares {
+                    if board.pieceAt(square: rank * 8 + offset) != nil {
+                        return false
+                    }
+                }
                 return true
             }
         }
-        
+
         return false
-    }
-
-    private func isValidKnightMove(move: Move) -> Bool {
-        let knightMoves = [15, 17, -15, -17, 10, -10, 6, -6]
-        return knightMoves.contains(move.to - move.from)
-    }
-
-    private func isValidBishopMove(move: Move, board: ChessBoard) -> Bool {
-        return isValidDiagonalMove(move: move, board: board)
-    }
-
-    private func isValidRookMove(move: Move, board: ChessBoard) -> Bool {
-        return isValidStraightMove(move: move, board: board)
-    }
-
-    private func isValidQueenMove(move: Move, board: ChessBoard) -> Bool {
-        return isValidStraightMove(move: move, board: board) || isValidDiagonalMove(move: move, board: board)
-    }
-
-    private func isValidKingMove(move: Move, board: ChessBoard) -> Bool {
-        let kingMoves = [1, -1, 8, -8, 7, -7, 9, -9]
-        if kingMoves.contains(move.to - move.from) {
-            return true
-        }
-        
-        if move.isCastling {
-            if isCastlingLegal(move: move, board: board) {
-                return true
-            }
-        }
-        
-        return false
-    }
-
-    private func isValidStraightMove(move: Move, board: ChessBoard) -> Bool {
-        let direction = move.to > move.from ? 1 : -1
-        let diff = abs(move.to - move.from)
-        if diff % 8 == 0 {
-            for i in stride(from: move.from + direction * 8, to: move.to, by: direction * 8) {
-                if board.getOccupancy().isBitSet(at: i) {
-                    return false
-                }
-            }
-            return true
-        } else if move.from / 8 == move.to / 8 {
-            for i in stride(from: move.from + direction, to: move.to, by: direction) {
-                if board.getOccupancy().isBitSet(at: i) {
-                    return false
-                }
-            }
-            return true
-        }
-        return false
-    }
-
-    private func isValidDiagonalMove(move: Move, board: ChessBoard) -> Bool {
-        let diff = abs(move.to - move.from)
-        let direction = (move.to > move.from) ? 1 : -1
-        if diff % 7 == 0 {
-            for i in stride(from: move.from + direction * 7, to: move.to, by: direction * 7) {
-                if board.getOccupancy().isBitSet(at: i) {
-                    return false
-                }
-            }
-            return true
-        } else if diff % 9 == 0 {
-            for i in stride(from: move.from + direction * 9, to: move.to, by: direction * 9) {
-                if board.getOccupancy().isBitSet(at: i) {
-                    return false
-                }
-            }
-            return true
-        }
-        return false
-    }
-
-    private func isCastlingLegal(move: Move, board: ChessBoard) -> Bool {
-        let king = (move.piece == .whiteKing) ? ChessPiece.whiteKing : ChessPiece.blackKing
-        let rook = (move.piece == .whiteKing) ? ChessPiece.whiteRook : ChessPiece.blackRook
-        
-        if move.to == move.from + 2 {
-            let rookFrom = move.from + 3
-            if board.pieceAt(square: move.from + 1) == nil && board.pieceAt(square: move.from + 2) == nil && board.pieceAt(square: rookFrom) == rook {
-                if !board.isSquareUnderAttack(square: move.from, by: board.turn.opposite) &&
-                   !board.isSquareUnderAttack(square: move.from + 1, by: board.turn.opposite) &&
-                   !board.isSquareUnderAttack(square: move.from + 2, by: board.turn.opposite) {
-                    return true
-                }
-            }
-        }
-        
-        if move.to == move.from - 2 {
-            let rookFrom = move.from - 4
-            if board.pieceAt(square: move.from - 1) == nil && board.pieceAt(square: move.from - 2) == nil && board.pieceAt(square: move.from - 3) == nil && board.pieceAt(square: rookFrom) == rook {
-                if !board.isSquareUnderAttack(square: move.from, by: board.turn.opposite) &&
-                   !board.isSquareUnderAttack(square: move.from - 1, by: board.turn.opposite) &&
-                   !board.isSquareUnderAttack(square: move.from - 2, by: board.turn.opposite) {
-                    return true
-                }
-            }
-        }
-        
-        return false
-    }
-
-    private func doesMoveLeaveKingSafe(move: Move, board: ChessBoard) -> Bool {
-        let updatedBoard = board.copy() 
-        updatedBoard.makeMove(move) 
-        let kingSquare = updatedBoard.getKingSquare(for: board.turn) 
-
-        return !updatedBoard.isSquareUnderAttack(square: kingSquare, by: board.turn.opposite)
     }
 }

@@ -4,6 +4,7 @@ class ChessBoard {
     private var bitboards: [ChessPiece: Bitboard] = [:]
     private var occupancy: Bitboard = Bitboard()
     var turn: Color = .white
+    var enPassantSquare: Int? = nil 
 
     init() {
         for piece in ChessPiece.allCases {
@@ -22,13 +23,15 @@ class ChessBoard {
 
     func loadFEN(_ fen: String) {
         let parts = fen.split(separator: " ")
-        guard parts.count > 0 else { return }
+        guard parts.count > 2 else { return }
         
         let boardFEN = parts[0]
         let turnFEN = parts[1]
+        let enPassantFEN = parts[3]
         let rows = boardFEN.split(separator: "/")
         
         turn = (turnFEN == "w") ? .white : .black
+        enPassantSquare = enPassantFEN == "-" ? nil : squareIndex(file: Int(enPassantFEN.prefix(1).unicodeScalars.first!.value - 97), rank: Int(enPassantFEN.suffix(1))! - 1)
         
         for (rankIndex, row) in rows.reversed().enumerated() {
             var fileIndex = 0
@@ -77,6 +80,8 @@ class ChessBoard {
         }
         fen += " "
         fen += (turn == .white) ? "w" : "b"
+        fen += " - " 
+        fen += enPassantSquare != nil ? "\(String(UnicodeScalar(97 + enPassantSquare! % 8)!))\(1 + enPassantSquare! / 8)" : "-"
         return fen
     }
 
@@ -116,24 +121,36 @@ class ChessBoard {
             let capturedPawnSquare = move.to + (turn == .white ? -8 : 8)
             let capturedPawn = (turn == .white) ? ChessPiece.blackPawn : ChessPiece.whitePawn
             bitboards[capturedPawn]?.clearBit(at: capturedPawnSquare)
+            occupancy.clearBit(at: capturedPawnSquare) 
         }
         
         if move.isCastling {
             let rookFrom, rookTo: Int
-            if move.to == squareIndex(file: 6, rank: turn == .white ? 0 : 7) { // Kingside
+            if move.to == squareIndex(file: 6, rank: turn == .white ? 0 : 7) { 
                 rookFrom = squareIndex(file: 7, rank: turn == .white ? 0 : 7)
                 rookTo = squareIndex(file: 5, rank: turn == .white ? 0 : 7)
-            } else { // Queenside
+            } else { 
                 rookFrom = squareIndex(file: 0, rank: turn == .white ? 0 : 7)
                 rookTo = squareIndex(file: 3, rank: turn == .white ? 0 : 7)
             }
             bitboards[turn == .white ? .whiteRook : .blackRook]?.clearBit(at: rookFrom)
             bitboards[turn == .white ? .whiteRook : .blackRook]?.setBit(at: rookTo)
+            occupancy.clearBit(at: rookFrom)
+            occupancy.setBit(at: rookTo)
+        }
+
+        if move.piece == .whitePawn || move.piece == .blackPawn {
+            if abs(move.from - move.to) == 16 {
+                enPassantSquare = move.to + (turn == .white ? -8 : 8)
+            } else {
+                enPassantSquare = nil
+            }
+        } else {
+            enPassantSquare = nil
         }
 
         turn = turn.opposite
 
-        // Determine if the move results in a check
         let opponentColor = turn.opposite
         let opponentKingSquare = getKingSquare(for: opponentColor)
         move.isCheck = isSquareUnderAttack(square: opponentKingSquare, by: turn)
@@ -147,6 +164,7 @@ class ChessBoard {
         
         if let capturedPiece = move.capturedPiece {
             bitboards[capturedPiece]?.setBit(at: move.to)
+            occupancy.setBit(at: move.to)
         }
 
         if let promotionPiece = move.promotion {
@@ -158,20 +176,25 @@ class ChessBoard {
             let capturedPawnSquare = move.to + (turn == .white ? -8 : 8)
             let capturedPawn = (turn == .white) ? ChessPiece.blackPawn : ChessPiece.whitePawn
             bitboards[capturedPawn]?.setBit(at: capturedPawnSquare)
+            occupancy.setBit(at: capturedPawnSquare)
         }
 
         if move.isCastling {
             let rookFrom, rookTo: Int
-            if move.to == squareIndex(file: 6, rank: turn == .white ? 0 : 7) { // Kingside
+            if move.to == squareIndex(file: 6, rank: turn == .white ? 0 : 7) { 
                 rookFrom = squareIndex(file: 5, rank: turn == .white ? 0 : 7)
                 rookTo = squareIndex(file: 7, rank: turn == .white ? 0 : 7)
-            } else { // Queenside
+            } else { 
                 rookFrom = squareIndex(file: 3, rank: turn == .white ? 0 : 7)
                 rookTo = squareIndex(file: 0, rank: turn == .white ? 0 : 7)
             }
             bitboards[turn == .white ? .whiteRook : .blackRook]?.clearBit(at: rookFrom)
             bitboards[turn == .white ? .whiteRook : .blackRook]?.setBit(at: rookTo)
+            occupancy.clearBit(at: rookFrom)
+            occupancy.setBit(at: rookTo)
         }
+
+        enPassantSquare = nil
 
         turn = turn.opposite
     }
@@ -181,8 +204,10 @@ class ChessBoard {
         board.bitboards = bitboards
         board.occupancy = occupancy
         board.turn = turn
+        board.enPassantSquare = enPassantSquare
         return board
     }
+
     func getKingSquare(for color: Color) -> Int {
         let king = (color == .white) ? ChessPiece.whiteKing : ChessPiece.blackKing
         return bitboards[king]?.board.trailingZeroBitCount ?? -1
