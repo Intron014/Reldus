@@ -237,7 +237,7 @@ class UCI {
             }
             board.undoMove(move)
             
-            if moveValue > bestValue {
+            if moveValue > bestValue && MoveValidator().isMoveLegal(move: move, board: board){
                 bestValue = moveValue
                 bestMove = move
             }
