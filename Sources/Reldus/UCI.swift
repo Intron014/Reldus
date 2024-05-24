@@ -216,33 +216,33 @@ class UCI {
 
     private func handleGo(command: String, board: ChessBoard) {
         let parts = command.split(separator: " ")
-        
+
         if let depthIndex = parts.firstIndex(of: "depth"), depthIndex + 1 < parts.count {
             searchDepth = Int(parts[depthIndex + 1]) ?? 3
         }
-        
+
         var bestMove: Move?
         var bestValue = Int.min
-        
+
         let moves = MoveGenerator.generateMoves(for: board, color: board.turn)
-        
+
         for move in moves {
             board.makeMove(move)
             let boardCopy = board.copy()
             var moveValue: Int
-            if(board.turn == .white){
-                moveValue = Search.minimax(board: boardCopy, depth: searchDepth - 1, maximizingPlayer: true)
+            if board.turn == .white {
+                moveValue = Search.alphabeta(board: boardCopy, depth: searchDepth - 1, alpha: Int.min, beta: Int.max, maximizingPlayer: true)
             } else {
-                moveValue = Search.minimax(board: boardCopy, depth: searchDepth - 1, maximizingPlayer: false)
+                moveValue = Search.alphabeta(board: boardCopy, depth: searchDepth - 1, alpha: Int.min, beta: Int.max, maximizingPlayer: false)
             }
             board.undoMove(move)
-            
-            if moveValue > bestValue && MoveValidator().isMoveLegal(move: move, board: board){
+
+            if moveValue > bestValue && MoveValidator().isMoveLegal(move: move, board: board) {
                 bestValue = moveValue
                 bestMove = move
             }
         }
-        
+
         if let bestMove = bestMove {
             print("bestmove \(bestMove.toUCI())")
         } else {
