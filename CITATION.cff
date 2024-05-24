@@ -1,0 +1,19 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Reldus
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Jorge
+    family-names: Benjumea Burillo
+repository-code: 'https://gitea.intron014.com/Intron014/Reldus'
+repository: 'https://github.com/Intron014/Reldus'
+abstract: Chess engine written in Swift
+keywords:
+  - Swift
+  - Chess Engine
+license: MIT
