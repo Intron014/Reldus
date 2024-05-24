@@ -36,7 +36,7 @@ class UCI {
         case "quit":
             handleQuit()
         case "board":
-            board.printBoard()
+            handlePrint(board: board)
         default:
             print("Unknown command: \(commandName)")
         }
@@ -58,7 +58,19 @@ class UCI {
         board = ChessBoard(fen: startPosFen)
     }
     
-    func handlePerft(command: String) {
+    private func handlePrint(board: ChessBoard) {
+        print(board.printBoard(), terminator: "\r  \n")
+        print("Side to move: \(board.turn)")
+        print("Castling rights: " + board.printCastlingRights())
+        if let enPassantSquare = board.enPassantSquare {
+            print("En passant square: \(squareToString(square: enPassantSquare))")
+        } else {
+            print("En passant square: None")
+        }
+        print("FEN: \(board.getFEN())")
+    }
+
+    private func handlePerft(command: String) {
         let board = ChessBoard(fen: startPosFen)
         let parts = command.split(separator: " ")
         guard parts.count > 1, let depth = Int(parts[1]) else {
