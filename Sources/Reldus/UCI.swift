@@ -40,6 +40,8 @@ class UCI {
         default:
             print("Unknown command: \(commandName)")
         }
+
+        fflush(stdout)
     }
 
     private func handleUCI() {
