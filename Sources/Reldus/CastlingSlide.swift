@@ -1,4 +1,4 @@
 enum CastlingSide {
-    case kingSide
-    case queenSide
+  case kingSide
+  case queenSide
 }
