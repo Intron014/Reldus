@@ -9,10 +9,20 @@ let package = Package(
         // Products define the executables and libraries a package produces, making them visible to other packages.
         .executable(name: "Reldus", targets: ["Reldus"])
     ],
+    dependencies: [
+        .package(url: "https://github.com/apple/swift-testing.git", branch: "main")
+    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .executableTarget(
-            name: "Reldus"),
+            name: "Reldus")
+        // .testTarget(
+        //     name: "ReldusTests",
+        //     dependencies: [
+        //         "Reldus",
+        //         .product(name: "Testing", package: "swift-testing"),
+        //     ]
+        // ),
     ]
 )
