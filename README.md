@@ -9,4 +9,9 @@
 
 </h1>
 
-A chess engine written in Swift
+Reldus is a UCI chess engine framework written in Swift. It is built from the ground up to be able to handle most things that you throw it.
+
+## ToDO
+- [ ] Remove bias
+- [ ] Implement correctly the framework for it's use without Reldus(non-core)
+- [ ] Make it do better moves?
