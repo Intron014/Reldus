@@ -30,7 +30,7 @@ public class UCI {
     case "position":
       handlePosition(command: command)
     case "goperft":
-      handlePerft(command: command.joined(separator: " "))
+      handlePerft(command: command)
     case "go":
       handleGo(command: command.joined(separator: " "), board: board)
     case "quit":
@@ -70,15 +70,22 @@ public class UCI {
     print("FEN: \(board.getFEN())")
   }
 
-  private func handlePerft(command: String) {
-    let board = ChessBoard(fen: startPosFen)
-    let parts = command.split(separator: " ")
-    guard parts.count > 1, let depth = Int(parts[1]) else {
+  private func handlePerft(command: [Substring]) {
+    guard let depth = Int(command[1]) else {
       print("Invalid perft command")
       return
     }
+    if command.count > 2, command[2] == "fen", command.count > 3 {
+      let fenString = command[3...].joined(separator: " ")
+      board = ChessBoard(fen: fenString)
+    } else {
+      board = ChessBoard(fen: startPosFen)
+    }
+
+    handlePrint(board: board)
 
     let startTime = Date()
+    print("Starting perft to depth \(depth)")
     let totalNodes = perft(board: board, depth: depth)
     let endTime = Date()
 
@@ -248,8 +255,8 @@ public class UCI {
 
       if (board.turn == .white && moveValue > bestValue) || (board.turn == .black && moveValue < bestValue) {
         if MoveValidator().isMoveLegal(move: move, board: board) {
-        bestValue = moveValue
-        bestMove = move
+          bestValue = moveValue
+          bestMove = move
         }
       }
     }
