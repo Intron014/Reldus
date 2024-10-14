@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   build:
-    name: Swift ${{ matrix.swift }} on ${{ matrix.os }}
+    if: contains(github.event.head_commit.message, 'feat') || contains(github.event.head_commit.message, 'fix')
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
