@@ -5,8 +5,8 @@ class Evaluator {
   private static let pieceValues: [ChessPiece: Int] = [
     .whitePawn: 100, .whiteKnight: 320, .whiteBishop: 330, .whiteRook: 500, .whiteQueen: 900,
     .whiteKing: 20000,
-    .blackPawn: -100, .blackKnight: -320, .blackBishop: -330, .blackRook: -500, .blackQueen: -900,
-    .blackKing: -20000,
+    .blackPawn: 100, .blackKnight: 320, .blackBishop: 330, .blackRook: 500, .blackQueen: 900,
+    .blackKing: 20000,
   ]
 
   private static let pawnTable: [Int] = [
@@ -75,37 +75,40 @@ class Evaluator {
     -30, -40, -40, -50, -50, -40, -40, -30,
   ]
 
-  static func evaluate(board: ChessBoard, color: Color) -> Int {
+  static func evaluate(board: ChessBoard) -> Int {
     var score = 0
-
-    score += evaluateMaterial(board: board, color: color)
-    score += evaluatePosition(board: board, color: color)
-
+    score += evaluateMaterial(board: board)
+    score += evaluatePosition(board: board)
     return score
   }
 
-  private static func evaluateMaterial(board: ChessBoard, color: Color) -> Int {
+  private static func evaluateMaterial(board: ChessBoard) -> Int {
     var materialScore = 0
     for piece in ChessPiece.allCases {
       let pieceValue = pieceValues[piece] ?? 0
       let bitboard = board.getBitboard(for: piece)
-      materialScore += pieceValue * bitboard.popCount()
+      let count = bitboard.popCount()
+      materialScore += piece.color == .white ? pieceValue * count : -pieceValue * count
     }
     return materialScore
   }
 
-  private static func evaluatePosition(board: ChessBoard, color: Color) -> Int {
+  private static func evaluatePosition(board: ChessBoard) -> Int {
     var positionalScore = 0
     for piece in ChessPiece.allCases {
       let table = getPieceTable(piece: piece)
       let bitboard = board.getBitboard(for: piece)
       for square in bitboard.getOccupiedSquares() {
-        let positionValue = table[square]
-        positionalScore += piece.color == color ? positionValue : -positionValue
+        var positionValue = table[square]
+        if piece.color == .black {
+          positionValue = table[63 - square]
+        }
+        positionalScore += piece.color == .white ? positionValue : -positionValue
       }
     }
     return positionalScore
   }
+
 
   private static func getPieceTable(piece: ChessPiece) -> [Int] {
     switch piece {

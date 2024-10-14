@@ -230,28 +230,27 @@ public class UCI {
     }
 
     var bestMove: Move?
-    var bestValue = Int.min
+    var bestValue = board.turn == .white ? Int.min : Int.max
 
     let moves = MoveGenerator.generateMoves(for: board, color: board.turn)
 
     for move in moves {
       board.makeMove(move)
       let boardCopy = board.copy()
-      var moveValue: Int
-      if board.turn == .white {
-        moveValue = Search.alphabeta(
-          board: boardCopy, depth: searchDepth - 1, alpha: Int.min, beta: Int.max,
-          maximizingPlayer: true)
-      } else {
-        moveValue = Search.alphabeta(
-          board: boardCopy, depth: searchDepth - 1, alpha: Int.min, beta: Int.max,
-          maximizingPlayer: false)
-      }
+      let moveValue = Search.alphabeta(
+        board: boardCopy,
+        depth: searchDepth - 1,
+        alpha: Int.min,
+        beta: Int.max,
+        maximizingPlayer: board.turn == .black
+      )
       board.undoMove(move)
 
-      if moveValue > bestValue && MoveValidator().isMoveLegal(move: move, board: board) {
+      if (board.turn == .white && moveValue > bestValue) || (board.turn == .black && moveValue < bestValue) {
+        if MoveValidator().isMoveLegal(move: move, board: board) {
         bestValue = moveValue
         bestMove = move
+        }
       }
     }
 
