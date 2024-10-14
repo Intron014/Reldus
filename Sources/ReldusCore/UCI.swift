@@ -1,16 +1,16 @@
 import Foundation
 
-class UCI {
+public class UCI {
   private var board: ChessBoard
   private var searchDepth: Int
   private let startPosFen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
-  init() {
+  public init() {
     self.board = ChessBoard(fen: startPosFen)
     self.searchDepth = 3
   }
 
-  func start() {
+  public func start() {
     while let line = readLine() {
       let command = line.split(separator: " ")
       handleCommand(command: Array(command))
