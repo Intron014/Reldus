@@ -236,25 +236,25 @@ public class UCI {
       searchDepth = Int(parts[depthIndex + 1]) ?? 3
     }
 
+    let currentTurn = board.turn
     var bestMove: Move?
-    var bestValue = board.turn == .white ? Int.min : Int.max
+    var bestValue = currentTurn == .white ? Int.min : Int.max
 
     let moves = MoveGenerator.generateMoves(for: board, color: board.turn)
 
     for move in moves {
-      board.makeMove(move)
-      let boardCopy = board.copy()
-      let moveValue = Search.alphabeta(
-        board: boardCopy,
-        depth: searchDepth - 1,
-        alpha: Int.min,
-        beta: Int.max,
-        maximizingPlayer: board.turn == .black
-      )
-      board.undoMove(move)
+      if MoveValidator().isMoveLegal(move: move, board: board) {
+        board.makeMove(move)
+        let moveValue = Search.alphabeta(
+          board: board,
+          depth: searchDepth - 1,
+          alpha: Int.min,
+          beta: Int.max
+        )
+        board.undoMove(move)
 
-      if (board.turn == .white && moveValue > bestValue) || (board.turn == .black && moveValue < bestValue) {
-        if MoveValidator().isMoveLegal(move: move, board: board) {
+        if (currentTurn == .white && moveValue > bestValue) ||
+           (currentTurn == .black && moveValue < bestValue) {
           bestValue = moveValue
           bestMove = move
         }
