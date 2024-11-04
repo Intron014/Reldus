@@ -71,31 +71,59 @@ public class UCI {
   }
 
   private func handlePerft(command: [Substring]) {
-    guard let depth = Int(command[1]) else {
-      print("Invalid perft command")
-      return
+    guard command.count > 1 else {
+        print("Invalid perft command")
+        return
     }
-    if command.count > 2, command[2] == "fen", command.count > 3 {
-      let fenString = command[3...].joined(separator: " ")
-      board = ChessBoard(fen: fenString)
+
+    let depthArg = String(command[1])
+    let depths: [Int]
+
+    if depthArg.contains("-") {
+        let rangeParts = depthArg.split(separator: "-")
+        if rangeParts.count == 2, let startDepth = Int(rangeParts[0]), let endDepth = Int(rangeParts[1]), startDepth <= endDepth {
+            depths = Array(startDepth...endDepth)
+        } else {
+            print("Invalid depth range")
+            return
+        }
+    } else if let depth = Int(depthArg) {
+        depths = [depth]
     } else {
-      board = ChessBoard(fen: startPosFen)
+        print("Invalid perft command")
+        return
+    }
+
+    if command.count > 2, command[2] == "fen", command.count > 3 {
+        let fenString = command[3...].joined(separator: " ")
+        board = ChessBoard(fen: fenString)
+    } else {
+        board = ChessBoard(fen: startPosFen)
     }
 
     handlePrint(board: board)
 
-    let startTime = Date()
-    print("Starting perft to depth \(depth)")
-    let totalNodes = perft(board: board, depth: depth)
-    let endTime = Date()
+    var results: [(depth: Int, totalNodes: Int, timeTaken: Double, nodesPerSecond: Double)] = []
 
-    let timeTaken = endTime.timeIntervalSince(startTime)
-    let nodesPerSecond = Double(totalNodes) / timeTaken
+    for depth in depths {
+        let startTime = Date()
+        print("Starting perft to depth \(depth)")
+        let totalNodes = perft(board: board, depth: depth)
+        let endTime = Date()
 
-    print("Total: \(totalNodes)")
-    print(String(format: "Time: %.2f secs", timeTaken))
-    print(String(format: "NodesPerSec: %.2f NPS", nodesPerSecond))
-  }
+        let timeTaken = endTime.timeIntervalSince(startTime)
+        let nodesPerSecond = Double(totalNodes) / timeTaken
+
+        results.append((depth, totalNodes, timeTaken, nodesPerSecond))
+    }
+
+    print("\nSummary:")
+    print("Depth | Total Nodes | Time (secs) | Nodes Per Second (NPS)")
+    print("---------------------------------------------------------")
+    for result in results {
+        print(String(format: "%5d | %11d | %10.2f | %20.2f", result.depth, result.totalNodes, result.timeTaken, result.nodesPerSecond))
+    }
+}
 
   private func perft(board: ChessBoard, depth: Int) -> Int {
     var totalNodes = 0
